@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Employee List</string>
+    <string name="loading">Loading list...</string>
+</resources>
