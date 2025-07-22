@@ -10,7 +10,9 @@
         android:id="@+id/item_employee_cv"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:layout_margin="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:attr/selectableItemBackground"
@@ -24,18 +26,28 @@
             android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/item_employee_image"
+                android:id="@+id/employee_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop" />
 
             <TextView
-                android:id="@+id/item_employee_name"
+                android:id="@+id/employee_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center|bottom"
                 android:textColor="@color/white"
                 android:textAlignment="center" />
+
+            <ImageView
+                android:id="@+id/employee_delete"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/ic_close"
+                android:layout_gravity="end"
+                app:tint="@color/white"
+                android:contentDescription="Delete user"
+                />
         </FrameLayout>
     </androidx.cardview.widget.CardView>
 

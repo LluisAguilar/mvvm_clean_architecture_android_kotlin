@@ -22,7 +22,7 @@ class EmployeesViewModel @Inject constructor(private val getEmployeesUseCase: Ge
         getEmployees()
     }
 
-    fun getEmployees() {
+    private fun getEmployees() {
         viewModelScope.launch {
             getEmployeesUseCase()
                 .collect { response ->

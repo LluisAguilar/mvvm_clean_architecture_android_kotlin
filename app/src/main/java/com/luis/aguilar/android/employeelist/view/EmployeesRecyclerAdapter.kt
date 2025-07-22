@@ -1,5 +1,3 @@
-package com.luis.aguilar.android.employeelist.view
-
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -7,46 +5,56 @@ import com.luis.aguilar.android.employeelist.databinding.ItemEmployeeBinding
 import com.luis.aguilar.android.employeelist.domain.model.Employee
 import com.squareup.picasso.Picasso
 
-class EmployeesRecyclerAdapter(private var employeeDataList: List<Employee>, listener: EmployeeClickListener):
+class EmployeesRecyclerAdapter(
+    var employeesList: MutableList<Employee>,
+    val onItemClicked: (Int) -> Unit,
+    val onItemDeleted: (Int) -> Unit,
+    ) :
     RecyclerView.Adapter<EmployeesRecyclerAdapter.EmployeesViewHolder>() {
 
-    private var itemClickListener: EmployeeClickListener = listener
-
-    override fun onCreateViewHolder(parent: ViewGroup, i: Int): EmployeesViewHolder {
-        val itemBinding = ItemEmployeeBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return EmployeesViewHolder(itemBinding)
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): EmployeesViewHolder {
+        val binding =
+            ItemEmployeeBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return EmployeesViewHolder(binding)
     }
 
-    override fun onBindViewHolder(employeeViewHolder: EmployeesViewHolder, position: Int) {
-        employeeViewHolder.bind(employeeDataList, itemClickListener)
+    override fun onBindViewHolder(
+        holder: EmployeesViewHolder,
+        position: Int
+    ) {
+        holder.bind(employeesList[position])
     }
 
     override fun getItemCount(): Int {
-        return employeeDataList.size
+        return employeesList.size
     }
 
-    fun updateAdapter(employeeList:List<Employee>){
-        this.employeeDataList = employeeList
+    fun updateEmployees(employees: MutableList<Employee>) {
+        this.employeesList = employees
         notifyDataSetChanged()
     }
 
-    class EmployeesViewHolder(private val itemBinding: ItemEmployeeBinding) : RecyclerView.ViewHolder(itemBinding.root) {
+    inner class EmployeesViewHolder(val binding: ItemEmployeeBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(employeeDataList: List<Employee>, listener: EmployeeClickListener) {
-            with(itemBinding.itemEmployeeName) {
-                text = employeeDataList[adapterPosition].full_name
-                setOnClickListener {
-                    listener.onEmployeeClick(employeeDataList[adapterPosition].full_name, adapterPosition)
+        fun bind(employee: Employee) {
+            binding.apply {
+                employeeName.text = employee.full_name
+                Picasso.get().load(employee.photo_url_small).into(employeeImage)
+                itemEmployeeTeam.text = employee.team
+                itemEmployeeBiography.text = employee.biography
+
+                employeeImage.setOnClickListener {
+                    onItemClicked(adapterPosition)
+                }
+
+                employeeDelete.setOnClickListener {
+                    onItemDeleted(adapterPosition)
                 }
             }
-            Picasso.get().load(employeeDataList[adapterPosition].photo_url_small).into(itemBinding.itemEmployeeImage)
-
-            itemBinding.itemEmployeeTeam.text = employeeDataList[adapterPosition].team
-            itemBinding.itemEmployeeBiography.text = employeeDataList[adapterPosition].biography
         }
-    }
-
-    interface EmployeeClickListener {
-        fun onEmployeeClick(employeeId:String, position: Int)
     }
 }

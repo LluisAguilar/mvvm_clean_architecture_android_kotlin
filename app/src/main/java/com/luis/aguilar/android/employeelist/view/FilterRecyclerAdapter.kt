@@ -23,11 +23,6 @@ class FilterRecyclerAdapter(private var filterList: List<String>, listener: Filt
         return filterList.size
     }
 
-    fun updateAdapter(filterList:List<String>){
-        this.filterList = filterList
-        notifyDataSetChanged()
-    }
-
     class FilterViewHolder(private val itemBinding: ItemFilterBinding) : RecyclerView.ViewHolder(itemBinding.root) {
 
         fun bind(filterList: List<String>, listener: FilterClickListener) {
