@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.*
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.luis.aguilar.android.employeelist.R
@@ -16,6 +17,7 @@ import com.luis.aguilar.android.employeelist.domain.model.Employee
 import com.luis.aguilar.android.employeelist.view.EmployeeUtilStrings.Companion.SAVED_FILTER_STATE
 import com.luis.aguilar.android.employeelist.view.viewmodel.EmployeesViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -34,27 +36,17 @@ class MainActivity : AppCompatActivity(), FilterRecyclerAdapter.FilterClickListe
 
     private lateinit var progressDialog : ProgressDialog
 
+    private lateinit var onScrollListener: PaginationScrollListener
+
+    private var isLoading = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.addEmployee.setOnClickListener {
-            this.employeesList.add(0,
-                Employee(
-                    biography = "Android developer Java|Kotlin",
-                    email_address = "luis@gmail.com",
-                    "Contractor",
-                    "Luis Aguilar Garcia",
-                    phone_number = "1234567890",
-                    photo_url_large = "https://miro.medium.com/v2/resize:fit:1400/format:webp/1*aUT1pcBqSFsq-cNvKK3UHg.jpeg",
-                    photo_url_small = "https://miro.medium.com/v2/resize:fit:1400/format:webp/1*aUT1pcBqSFsq-cNvKK3UHg.jpeg",
-                    team = "Android",
-                    uuid = "1234567"
-                )
-            )
-            this.adapter.notifyItemInserted(0)
-            binding.employeesRecycler.scrollToPosition(0)
+            getMoreItems()
         }
 
         adapter = EmployeesRecyclerAdapter(
@@ -73,10 +65,25 @@ class MainActivity : AppCompatActivity(), FilterRecyclerAdapter.FilterClickListe
 
         progressDialog = ProgressDialog(this)
 
+        val myLayoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         with(binding.employeesRecycler) {
-            layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+            layoutManager = myLayoutManager
             adapter = this@MainActivity.adapter
         }
+
+        onScrollListener = object : PaginationScrollListener(myLayoutManager) {
+            override fun loadMoreItems() {
+                isLoading = true
+                getMoreItems()
+            }
+
+            override fun isLoading(): Boolean {
+                return isLoading
+            }
+
+        }
+
+        binding.employeesRecycler.addOnScrollListener(onScrollListener)
 
         with(binding.filtersRecycler) {
             layoutManager = LinearLayoutManager(this@MainActivity,LinearLayoutManager.HORIZONTAL,false)
@@ -87,6 +94,29 @@ class MainActivity : AppCompatActivity(), FilterRecyclerAdapter.FilterClickListe
 
         binding.reloadSwipeToRefresh.setOnRefreshListener {
             attemptEmployeesRequest(true)
+        }
+    }
+
+    private fun getMoreItems() {
+        adapter.updateLoading(true)
+        lifecycleScope.launch {
+            delay(1000)
+            employeesList.add(employeesList.size -1,
+                Employee(
+                    biography = "Android developer Java|Kotlin",
+                    email_address = "luis@gmail.com",
+                    "Contractor",
+                    "Luis Aguilar Garcia",
+                    phone_number = "1234567890",
+                    photo_url_large = "https://miro.medium.com/v2/resize:fit:1400/format:webp/1*aUT1pcBqSFsq-cNvKK3UHg.jpeg",
+                    photo_url_small = "https://miro.medium.com/v2/resize:fit:1400/format:webp/1*aUT1pcBqSFsq-cNvKK3UHg.jpeg",
+                    team = "Android",
+                    uuid = "1234567"
+                )
+            )
+
+            isLoading = false
+            adapter.updateLoading(isLoading)
         }
     }
 
